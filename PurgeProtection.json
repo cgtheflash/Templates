@@ -1,0 +1,115 @@
+{
+"mode": "All",
+"policyRule": {
+"if": {
+"allOf": [
+{
+"field": "type",
+"equals": "Microsoft.KeyVault/vaults"
+},
+{
+"not": {
+"field": "Microsoft.KeyVault/vaults/createMode",
+"equals": "recover"
+}
+},
+{
+"field": "Microsoft.KeyVault/vaults/enableSoftDelete",
+"equals": "true"
+},
+{
+"field": "Microsoft.KeyVault/vaults/enablePurgeProtection",
+"exists": "false"
+}
+]
+},
+"then": {
+"effect": "[parameters('effect')]",
+"details": {
+"type": "Microsoft.KeyVault/vaults",
+"existenceCondition": {
+"field": "Microsoft.KeyVault/vaults/enablePurgeProtection",
+"equals": "true"
+},
+"roleDefinitionIds": [
+"/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c"
+],
+"deployment": {
+"properties": {
+"mode": "incremental",
+"parameters": {
+"keyVaultName": {
+"value": "[field('name')]"
+},
+"location": {
+"value": "[field('location')]"
+},
+"skuName": {
+"value": "[field('Microsoft.KeyVault/vaults/sku.name')]"
+},
+"tenantId": {
+"value": "[field('Microsoft.KeyVault/vaults/tenantId')]"
+},
+"accessPolicies": {
+"value": "[field('Microsoft.KeyVault/vaults/accessPolicies')]"
+}
+},
+"template": {
+"$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+"contentVersion": "1.0.0.0",
+"parameters": {
+"keyVaultName": {
+"type": "string"
+},
+"location": {
+"type": "string"
+},
+"skuName": {
+"type": "string"
+},
+"tenantId": {
+"type": "string"
+},
+"accessPolicies": {
+"type": "array"
+}
+},
+"variables": {},
+"resources": [
+{
+"type": "Microsoft.KeyVault/vaults",
+"apiVersion": "2021-06-01-preview",
+"name": "[parameters('keyVaultName')]",
+"location": "[parameters('location')]",
+"properties": {
+"sku": {
+"name": "[parameters('skuName')]",
+"family": "A"
+},
+"tenantId": "[parameters('tenantId')]",
+"accessPolicies": "[parameters('accessPolicies')]",
+"enablePurgeProtection": "true"
+}
+}
+]
+}
+}
+}
+}
+}
+},
+"parameters": {
+"effect": {
+"type": "String",
+"metadata": {
+"displayName": "Effect",
+"description": "Enable or disable the execution of the policy"
+},
+"allowedValues": [
+"DeployIfNotExists",
+"Disabled"
+],
+"defaultValue": "DeployIfNotExists"
+}
+}
+}
